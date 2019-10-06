@@ -1,0 +1,4 @@
+pre-commit:
+  commands:
+    linter:
+      run: ./node_modules/elm-analyse/dist/app/bin/index.js
