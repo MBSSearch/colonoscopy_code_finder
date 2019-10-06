@@ -1,9 +1,9 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, li, text, ul)
 import Http
-import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode as Decode exposing (Decoder, list, nullable, string)
 import Json.Decode.Pipeline exposing (required)
 
 
@@ -59,8 +59,19 @@ view model =
 
 viewTree : DecisionTree -> Html Msg
 viewTree tree =
+    let
+        answers =
+            case tree.root.answers of
+                Nothing ->
+                    []
+
+                Just answers_ ->
+                    answers_
+    in
     div []
-        [ text <| "I haven't figuered out how to decode the full tree yet, but the first question is: " ++ tree.root.text ]
+        [ text tree.root.text
+        , ul [] (List.map (\answer -> li [] [ text answer.text ]) answers)
+        ]
 
 
 getDecisionTree : Cmd Msg
@@ -76,6 +87,12 @@ type alias DecisionTree =
 
 
 type alias Node =
+    { text : String
+    , answers : Maybe (List Answer)
+    }
+
+
+type alias Answer =
     { text : String }
 
 
@@ -88,6 +105,13 @@ decisionTreeDecoder =
 nodeDecoder : Decoder Node
 nodeDecoder =
     Decode.succeed Node
+        |> required "text" string
+        |> required "answers" (nullable (list answerDecoder))
+
+
+answerDecoder : Decoder Answer
+answerDecoder =
+    Decode.succeed Answer
         |> required "text" string
 
 
