@@ -20,7 +20,14 @@ main =
 type Model
     = Loading
     | Failure Http.Error
-    | Success DecisionTree
+    | Success DecisionModel
+
+
+type alias DecisionModel =
+    { tree : DecisionTree
+    , currentNode : Node
+    , history : List Node
+    }
 
 
 init : () -> ( Model, Cmd Msg )
@@ -38,7 +45,7 @@ update msg _ =
         GotDecisionTree result ->
             case result of
                 Ok tree ->
-                    ( Success tree, Cmd.none )
+                    ( Success <| DecisionModel tree tree.root [], Cmd.none )
 
                 Err error ->
                     ( Failure error, Cmd.none )
@@ -53,8 +60,8 @@ view model =
         Failure error ->
             div [] [ text <| "There's been an error: " ++ toString error ]
 
-        Success tree ->
-            viewNode tree.root
+        Success decisionModel ->
+            viewNode decisionModel.tree.root
 
 
 viewNode : Node -> Html Msg
