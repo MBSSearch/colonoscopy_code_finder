@@ -19,7 +19,11 @@ main =
 type Model
     = Loading
     | Failure Http.Error
-    | Success String
+    | Success DecisionTree
+
+
+type alias DecisionTree =
+    String
 
 
 init : () -> ( Model, Cmd Msg )
@@ -28,7 +32,7 @@ init _ =
 
 
 type Msg
-    = GotDecisionTree (Result Http.Error String)
+    = GotDecisionTree (Result Http.Error DecisionTree)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -64,7 +68,7 @@ getDecisionTree =
         }
 
 
-decisionTreeDecoder : Decoder String
+decisionTreeDecoder : Decoder DecisionTree
 decisionTreeDecoder =
     field "root" (field "text" string)
 
