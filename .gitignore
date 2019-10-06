@@ -1,6 +1,8 @@
+node_modules
+
 # Taken from
 # https://github.com/github/gitignore/blob/baf13553d070d1d85d6c873235eb529077c35aaf/Elm.gitignore
-
+#
 # elm-package generated files
 elm-stuff
 # elm-repl generated files
