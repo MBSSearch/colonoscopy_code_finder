@@ -3,7 +3,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 import Browser
 import Html exposing (Html, div, li, text, ul)
 import Http
-import Json.Decode as Decode exposing (Decoder, list, nullable, string)
+import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
 import Json.Decode.Pipeline exposing (required)
 
 
@@ -54,23 +54,34 @@ view model =
             div [] [ text <| "There's been an error: " ++ toString error ]
 
         Success tree ->
-            viewTree tree
+            viewNode tree.root
 
 
-viewTree : DecisionTree -> Html Msg
-viewTree tree =
+viewNode : Node -> Html Msg
+viewNode node =
+    div []
+        [ text node.text
+        , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
+        ]
+
+
+viewAnswer : Answer -> Html Msg
+viewAnswer answer =
     let
-        answers =
-            case tree.root.answers of
-                Nothing ->
-                    []
+        next =
+            case answer.next of
+                Question question ->
+                    viewNode question
 
-                Just answers_ ->
-                    answers_
+                Number number_ ->
+                    div [] [ text <| "Item number " ++ String.fromInt number_ ]
+
+                Error _ ->
+                    div [] [ text "Unfunded" ]
     in
     div []
-        [ text tree.root.text
-        , ul [] (List.map (\answer -> li [] [ text answer.text ]) answers)
+        [ text answer.text
+        , next
         ]
 
 
@@ -88,12 +99,42 @@ type alias DecisionTree =
 
 type alias Node =
     { text : String
-    , answers : Maybe (List Answer)
+    , answers : Answers
     }
 
 
+
+-- The opaque type `Answers` allows us to _hide_ the recursion of nested
+--  questions in a question's answer.
+-- See https://github.com/elm/compiler/blob/master/hints/recursive-alias.md
+
+
+type Answers
+    = Answers (List Answer)
+
+
+
+-- Because `Answers` hides `List Answer` from the rest of the code, in order to
+-- `map` on the list we need implement our own function.
+-- See this post for more info on implementing functions for opaque types:
+-- https://medium.com/@ghivert/designing-api-in-elm-opaque-types-ce9d5f113033
+
+
+map : (Answer -> a) -> Answers -> List a
+map f (Answers l) =
+    List.map f l
+
+
 type alias Answer =
-    { text : String }
+    { text : String
+    , next : AnswerNext
+    }
+
+
+type AnswerNext
+    = Question Node
+    | Number Int
+    | Error String
 
 
 decisionTreeDecoder : Decoder DecisionTree
@@ -106,13 +147,31 @@ nodeDecoder : Decoder Node
 nodeDecoder =
     Decode.succeed Node
         |> required "text" string
-        |> required "answers" (nullable (list answerDecoder))
+        |> required "answers" (Decode.map Answers (list (lazy (\_ -> answerDecoder))))
 
 
 answerDecoder : Decoder Answer
 answerDecoder =
     Decode.succeed Answer
         |> required "text" string
+        |> required "next" (oneOf [ answerNextQuestionDecoder, answerNextNumberDecoder, answerNextErrorDecoder ])
+
+
+answerNextNumberDecoder : Decoder AnswerNext
+answerNextNumberDecoder =
+    Decode.succeed Number
+        |> required "item_number" int
+
+
+answerNextQuestionDecoder : Decoder AnswerNext
+answerNextQuestionDecoder =
+    Decode.map Question nodeDecoder
+
+
+answerNextErrorDecoder : Decoder AnswerNext
+answerNextErrorDecoder =
+    Decode.succeed Error
+        |> required "item_number" string
 
 
 toString : Http.Error -> String
