@@ -3,7 +3,8 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 import Browser
 import Html exposing (Html, div, text)
 import Http
-import Json.Decode exposing (Decoder, field, string)
+import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode.Pipeline exposing (required)
 
 
 main : Program () Model Msg
@@ -22,10 +23,6 @@ type Model
     | Success DecisionTree
 
 
-type alias DecisionTree =
-    String
-
-
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Loading, getDecisionTree )
@@ -40,8 +37,8 @@ update msg _ =
     case msg of
         GotDecisionTree result ->
             case result of
-                Ok value ->
-                    ( Success value, Cmd.none )
+                Ok tree ->
+                    ( Success tree, Cmd.none )
 
                 Err error ->
                     ( Failure error, Cmd.none )
@@ -56,8 +53,14 @@ view model =
         Failure error ->
             div [] [ text <| "There's been an error: " ++ toString error ]
 
-        Success value ->
-            div [] [ text <| "Loaded. I haven't figured out how to decode the tree yet, but the first question is: " ++ value ]
+        Success tree ->
+            viewTree tree
+
+
+viewTree : DecisionTree -> Html Msg
+viewTree tree =
+    div []
+        [ text <| "I haven't figuered out how to decode the full tree yet, but the first question is: " ++ tree.root.text ]
 
 
 getDecisionTree : Cmd Msg
@@ -68,9 +71,24 @@ getDecisionTree =
         }
 
 
+type alias DecisionTree =
+    { root : Node }
+
+
+type alias Node =
+    { text : String }
+
+
 decisionTreeDecoder : Decoder DecisionTree
 decisionTreeDecoder =
-    field "root" (field "text" string)
+    Decode.succeed DecisionTree
+        |> required "root" nodeDecoder
+
+
+nodeDecoder : Decoder Node
+nodeDecoder =
+    Decode.succeed Node
+        |> required "text" string
 
 
 toString : Http.Error -> String
