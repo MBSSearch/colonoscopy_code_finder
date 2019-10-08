@@ -1,7 +1,9 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, div, li, text, ul)
+import Html exposing (Html, a, div, li, text, ul)
+import Html.Attributes exposing (href)
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
 import Json.Decode.Pipeline exposing (required)
@@ -37,10 +39,11 @@ init _ =
 
 type Msg
     = GotDecisionTree (Result Http.Error DecisionTree)
+    | Select Answer
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg _ =
+update msg model =
     case msg of
         GotDecisionTree result ->
             case result of
@@ -49,6 +52,28 @@ update msg _ =
 
                 Err error ->
                     ( Failure error, Cmd.none )
+
+        Select answer ->
+            case model of
+                Success decisionModel ->
+                    case answer.next of
+                        Question node ->
+                            ( Success
+                                { decisionModel
+                                    | currentNode = node
+                                    , history = List.append decisionModel.history [ node ]
+                                }
+                            , Cmd.none
+                            )
+
+                        Number _ ->
+                            ( model, Cmd.none )
+
+                        Error _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -61,7 +86,7 @@ view model =
             div [] [ text <| "There's been an error: " ++ toString error ]
 
         Success decisionModel ->
-            viewNode decisionModel.tree.root
+            viewNode decisionModel.currentNode
 
 
 viewNode : Node -> Html Msg
@@ -74,21 +99,10 @@ viewNode node =
 
 viewAnswer : Answer -> Html Msg
 viewAnswer answer =
-    let
-        next =
-            case answer.next of
-                Question question ->
-                    viewNode question
-
-                Number number_ ->
-                    div [] [ text <| "Item number " ++ String.fromInt number_ ]
-
-                Error _ ->
-                    div [] [ text "Unfunded" ]
-    in
     div []
-        [ text answer.text
-        , next
+        [ a
+            [ href "#", onClick <| Select answer ]
+            [ text answer.text ]
         ]
 
 
