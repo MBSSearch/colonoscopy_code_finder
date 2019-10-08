@@ -80,6 +80,7 @@ init _ =
 type Msg
     = GotDecisionTree (Result Http.Error DecisionTree)
     | Select Answer
+    | GoBack
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -96,22 +97,67 @@ update msg model =
         Select answer ->
             case model of
                 Success decisionModel ->
-                    case answer.next of
-                        Question node ->
+                    case decisionModel.selection of
+                        Question currentNode ->
+                            let
+                                newHistory =
+                                    decisionModel.history ++ [ currentNode ]
+                            in
+                            case answer.next of
+                                Question node ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Question node
+                                            , history = newHistory
+                                        }
+                                    , Cmd.none
+                                    )
+
+                                Number itemNumber ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Number itemNumber
+                                            , history = decisionModel.history ++ [ currentNode ]
+                                        }
+                                    , Cmd.none
+                                    )
+
+                                Error message ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Error message
+                                            , history = decisionModel.history ++ [ currentNode ]
+                                        }
+                                    , Cmd.none
+                                    )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GoBack ->
+            case model of
+                Success decisionModel ->
+                    let
+                        lastElement =
+                            List.head <| List.reverse decisionModel.history
+
+                        remainder =
+                            List.reverse <| List.drop 1 <| List.reverse decisionModel.history
+                    in
+                    case lastElement of
+                        Just node ->
                             ( Success
                                 { decisionModel
                                     | selection = Question node
-                                    , history = List.append decisionModel.history [ node ]
+                                    , history = remainder
                                 }
                             , Cmd.none
                             )
 
-                        Number itemNumber ->
-                            ( Success { decisionModel | selection = Number itemNumber }
-                            , Cmd.none
-                            )
-
-                        Error _ ->
+                        Nothing ->
                             ( model, Cmd.none )
 
                 _ ->
@@ -128,7 +174,14 @@ view model =
             div [] [ text <| "There's been an error: " ++ toString error ]
 
         Success decisionModel ->
-            viewSelection decisionModel.selection
+            if List.isEmpty decisionModel.history then
+                div [] [ viewSelection decisionModel.selection ]
+
+            else
+                div []
+                    [ a [ href "#", onClick GoBack ] [ text "Back" ]
+                    , viewSelection decisionModel.selection
+                    ]
 
 
 viewSelection : Selection -> Html Msg
