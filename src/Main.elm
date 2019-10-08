@@ -19,6 +19,10 @@ main =
         }
 
 
+
+-- The model is not good enough, need better modelling (ah, ah)
+
+
 type Model
     = Loading
     | Failure Http.Error
@@ -27,9 +31,45 @@ type Model
 
 type alias DecisionModel =
     { tree : DecisionTree
-    , currentNode : Node
+    , selection : Selection
     , history : List Node
     }
+
+
+type alias DecisionTree =
+    { root : Node }
+
+
+type alias Node =
+    { text : String
+    , answers : Answers
+    }
+
+
+type alias Answer =
+    { text : String
+    , next : AnswerNext
+    }
+
+
+
+-- The opaque type `Answers` allows us to _hide_ the recursion of nested
+--  questions in a question's answer.
+-- See https://github.com/elm/compiler/blob/master/hints/recursive-alias.md
+
+
+type Answers
+    = Answers (List Answer)
+
+
+type AnswerNext
+    = Question Node
+    | Number Int
+    | Error String
+
+
+type alias Selection =
+    AnswerNext
 
 
 init : () -> ( Model, Cmd Msg )
@@ -48,7 +88,7 @@ update msg model =
         GotDecisionTree result ->
             case result of
                 Ok tree ->
-                    ( Success <| DecisionModel tree tree.root [], Cmd.none )
+                    ( Success <| DecisionModel tree (Question tree.root) [], Cmd.none )
 
                 Err error ->
                     ( Failure error, Cmd.none )
@@ -60,14 +100,16 @@ update msg model =
                         Question node ->
                             ( Success
                                 { decisionModel
-                                    | currentNode = node
+                                    | selection = Question node
                                     , history = List.append decisionModel.history [ node ]
                                 }
                             , Cmd.none
                             )
 
-                        Number _ ->
-                            ( model, Cmd.none )
+                        Number itemNumber ->
+                            ( Success { decisionModel | selection = Number itemNumber }
+                            , Cmd.none
+                            )
 
                         Error _ ->
                             ( model, Cmd.none )
@@ -86,7 +128,20 @@ view model =
             div [] [ text <| "There's been an error: " ++ toString error ]
 
         Success decisionModel ->
-            viewNode decisionModel.currentNode
+            viewSelection decisionModel.selection
+
+
+viewSelection : Selection -> Html Msg
+viewSelection selection =
+    case selection of
+        Question node ->
+            viewNode node
+
+        Number itemNumber ->
+            viewItem itemNumber
+
+        Error message ->
+            div [] [ text message ]
 
 
 viewNode : Node -> Html Msg
@@ -95,6 +150,11 @@ viewNode node =
         [ text node.text
         , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
         ]
+
+
+viewItem : Int -> Html Msg
+viewItem itemNumber =
+    div [] [ text <| String.fromInt itemNumber ]
 
 
 viewAnswer : Answer -> Html Msg
@@ -114,26 +174,6 @@ getDecisionTree =
         }
 
 
-type alias DecisionTree =
-    { root : Node }
-
-
-type alias Node =
-    { text : String
-    , answers : Answers
-    }
-
-
-
--- The opaque type `Answers` allows us to _hide_ the recursion of nested
---  questions in a question's answer.
--- See https://github.com/elm/compiler/blob/master/hints/recursive-alias.md
-
-
-type Answers
-    = Answers (List Answer)
-
-
 
 -- Because `Answers` hides `List Answer` from the rest of the code, in order to
 -- `map` on the list we need implement our own function.
@@ -144,18 +184,6 @@ type Answers
 map : (Answer -> a) -> Answers -> List a
 map f (Answers l) =
     List.map f l
-
-
-type alias Answer =
-    { text : String
-    , next : AnswerNext
-    }
-
-
-type AnswerNext
-    = Question Node
-    | Number Int
-    | Error String
 
 
 decisionTreeDecoder : Decoder DecisionTree
