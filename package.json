@@ -1,0 +1,24 @@
+{
+  "name": "colonoscopy_code_finder",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "elm-analyse": "^0.16.4",
+    "elm-live": "^4.0.0-rc.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MBSSearch/colonoscopy_code_finder.git"
+  },
+  "author": "Gio",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/MBSSearch/colonoscopy_code_finder/issues"
+  },
+  "homepage": "https://github.com/MBSSearch/colonoscopy_code_finder#readme"
+}
