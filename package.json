@@ -9,6 +9,7 @@
   },
   "devDependencies": {},
   "scripts": {
+    "watch": "./node_modules/elm-live/bin/elm-live.js -- src/Main.elm",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
