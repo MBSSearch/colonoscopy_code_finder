@@ -1,7 +1,9 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, div, li, text, ul)
+import Html exposing (Html, a, div, li, text, ul)
+import Html.Attributes exposing (href)
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
 import Json.Decode.Pipeline exposing (required)
@@ -17,80 +19,21 @@ main =
         }
 
 
+
+-- The model is not good enough, need better modelling (ah, ah)
+
+
 type Model
     = Loading
     | Failure Http.Error
-    | Success DecisionTree
+    | Success DecisionModel
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Loading, getDecisionTree )
-
-
-type Msg
-    = GotDecisionTree (Result Http.Error DecisionTree)
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg _ =
-    case msg of
-        GotDecisionTree result ->
-            case result of
-                Ok tree ->
-                    ( Success tree, Cmd.none )
-
-                Err error ->
-                    ( Failure error, Cmd.none )
-
-
-view : Model -> Html Msg
-view model =
-    case model of
-        Loading ->
-            div [] [ text "Loading..." ]
-
-        Failure error ->
-            div [] [ text <| "There's been an error: " ++ toString error ]
-
-        Success tree ->
-            viewNode tree.root
-
-
-viewNode : Node -> Html Msg
-viewNode node =
-    div []
-        [ text node.text
-        , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
-        ]
-
-
-viewAnswer : Answer -> Html Msg
-viewAnswer answer =
-    let
-        next =
-            case answer.next of
-                Question question ->
-                    viewNode question
-
-                Number number_ ->
-                    div [] [ text <| "Item number " ++ String.fromInt number_ ]
-
-                Error _ ->
-                    div [] [ text "Unfunded" ]
-    in
-    div []
-        [ text answer.text
-        , next
-        ]
-
-
-getDecisionTree : Cmd Msg
-getDecisionTree =
-    Http.get
-        { url = "https://s3-ap-southeast-2.amazonaws.com/static.mbssearch.com/colonoscopy_decision_tree.json"
-        , expect = Http.expectJson GotDecisionTree decisionTreeDecoder
-        }
+type alias DecisionModel =
+    { tree : DecisionTree
+    , selection : Selection
+    , history : List Node
+    }
 
 
 type alias DecisionTree =
@@ -100,6 +43,12 @@ type alias DecisionTree =
 type alias Node =
     { text : String
     , answers : Answers
+    }
+
+
+type alias Answer =
+    { text : String
+    , next : AnswerNext
     }
 
 
@@ -113,6 +62,171 @@ type Answers
     = Answers (List Answer)
 
 
+type AnswerNext
+    = Question Node
+    | Number Int
+    | Error String
+
+
+type alias Selection =
+    AnswerNext
+
+
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Loading, getDecisionTree )
+
+
+type Msg
+    = GotDecisionTree (Result Http.Error DecisionTree)
+    | Select Answer
+    | GoBack
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GotDecisionTree result ->
+            case result of
+                Ok tree ->
+                    ( Success <| DecisionModel tree (Question tree.root) [], Cmd.none )
+
+                Err error ->
+                    ( Failure error, Cmd.none )
+
+        Select answer ->
+            case model of
+                Success decisionModel ->
+                    case decisionModel.selection of
+                        Question currentNode ->
+                            let
+                                newHistory =
+                                    decisionModel.history ++ [ currentNode ]
+                            in
+                            case answer.next of
+                                Question node ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Question node
+                                            , history = newHistory
+                                        }
+                                    , Cmd.none
+                                    )
+
+                                Number itemNumber ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Number itemNumber
+                                            , history = decisionModel.history ++ [ currentNode ]
+                                        }
+                                    , Cmd.none
+                                    )
+
+                                Error message ->
+                                    ( Success
+                                        { decisionModel
+                                            | selection = Error message
+                                            , history = decisionModel.history ++ [ currentNode ]
+                                        }
+                                    , Cmd.none
+                                    )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GoBack ->
+            case model of
+                Success decisionModel ->
+                    let
+                        lastElement =
+                            List.head <| List.reverse decisionModel.history
+
+                        remainder =
+                            List.reverse <| List.drop 1 <| List.reverse decisionModel.history
+                    in
+                    case lastElement of
+                        Just node ->
+                            ( Success
+                                { decisionModel
+                                    | selection = Question node
+                                    , history = remainder
+                                }
+                            , Cmd.none
+                            )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+
+view : Model -> Html Msg
+view model =
+    case model of
+        Loading ->
+            div [] [ text "Loading..." ]
+
+        Failure error ->
+            div [] [ text <| "There's been an error: " ++ toString error ]
+
+        Success decisionModel ->
+            if List.isEmpty decisionModel.history then
+                div [] [ viewSelection decisionModel.selection ]
+
+            else
+                div []
+                    [ a [ href "#", onClick GoBack ] [ text "Back" ]
+                    , viewSelection decisionModel.selection
+                    ]
+
+
+viewSelection : Selection -> Html Msg
+viewSelection selection =
+    case selection of
+        Question node ->
+            viewNode node
+
+        Number itemNumber ->
+            viewItem itemNumber
+
+        Error message ->
+            div [] [ text message ]
+
+
+viewNode : Node -> Html Msg
+viewNode node =
+    div []
+        [ text node.text
+        , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
+        ]
+
+
+viewItem : Int -> Html Msg
+viewItem itemNumber =
+    div [] [ text <| String.fromInt itemNumber ]
+
+
+viewAnswer : Answer -> Html Msg
+viewAnswer answer =
+    div []
+        [ a
+            [ href "#", onClick <| Select answer ]
+            [ text answer.text ]
+        ]
+
+
+getDecisionTree : Cmd Msg
+getDecisionTree =
+    Http.get
+        { url = "https://s3-ap-southeast-2.amazonaws.com/static.mbssearch.com/colonoscopy_decision_tree.json"
+        , expect = Http.expectJson GotDecisionTree decisionTreeDecoder
+        }
+
+
 
 -- Because `Answers` hides `List Answer` from the rest of the code, in order to
 -- `map` on the list we need implement our own function.
@@ -123,18 +237,6 @@ type Answers
 map : (Answer -> a) -> Answers -> List a
 map f (Answers l) =
     List.map f l
-
-
-type alias Answer =
-    { text : String
-    , next : AnswerNext
-    }
-
-
-type AnswerNext
-    = Question Node
-    | Number Int
-    | Error String
 
 
 decisionTreeDecoder : Decoder DecisionTree
