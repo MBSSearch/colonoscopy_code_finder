@@ -179,7 +179,12 @@ view model =
 
             else
                 div []
-                    [ a [ href "#", onClick GoBack ] [ text "Back" ]
+                    [ a
+                        [ class "py-2 underline mb-4 inline-block"
+                        , href "#"
+                        , onClick GoBack
+                        ]
+                        [ text "Back" ]
                     , viewSelection decisionModel.selection
                     ]
 
