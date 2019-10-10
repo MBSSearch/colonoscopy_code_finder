@@ -212,7 +212,7 @@ viewItem itemNumber =
 
 viewAnswer : Answer -> Html Msg
 viewAnswer answer =
-    div []
+    div [ class "border border-solid bg-gray-100 rounded mb-2 px-4 py-4" ]
         [ a
             [ href "#", onClick <| Select answer ]
             [ text answer.text ]
