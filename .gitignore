@@ -1,7 +1,7 @@
 node_modules
 
-# This is where we put all the JS generated from the Elm code
-elm.js
+# We don't ignore the .js file on the gh-pages branch ;)
+!elm.js
 
 # Taken from
 # https://github.com/github/gitignore/blob/baf13553d070d1d85d6c873235eb529077c35aaf/Elm.gitignore
