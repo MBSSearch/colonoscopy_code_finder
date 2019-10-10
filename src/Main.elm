@@ -199,7 +199,7 @@ viewSelection selection =
             viewItem itemNumber
 
         Error message ->
-            div [] [ text message ]
+            div [ class "text-lg" ] [ text message ]
 
 
 viewNode : Node -> Html Msg
@@ -212,7 +212,7 @@ viewNode node =
 
 viewItem : Int -> Html Msg
 viewItem itemNumber =
-    div [] [ text <| String.fromInt itemNumber ]
+    div [ class "text-lg" ] [ text <| String.fromInt itemNumber ]
 
 
 viewAnswer : Answer -> Html Msg
