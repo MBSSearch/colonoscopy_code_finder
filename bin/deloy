@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# At this point, the commit might fail if nothing in the Elm source changed.
+# I haven't figured out a way to keep going and push anyway.
 git stash \
   && git push \
   && git checkout gh-pages \
