@@ -9,6 +9,6 @@ git stash \
   && elm make src/Main.elm --output=elm.js \
   && git add elm.js \
   && git commit -m "Deploy $(date +%Y%m%d-%H:%M:%S) ($(date +%s))" \
-  && git push \
+  && git push -f \
   && git checkout master \
   && git stash pop
