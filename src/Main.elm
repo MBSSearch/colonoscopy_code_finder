@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (Html, a, div, li, text, ul)
-import Html.Attributes exposing (href)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
@@ -200,7 +200,7 @@ viewSelection selection =
 viewNode : Node -> Html Msg
 viewNode node =
     div []
-        [ text node.text
+        [ div [ class "text-2xl font-semibold mb-8 text-gray-800" ] [ text node.text ]
         , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
         ]
 
