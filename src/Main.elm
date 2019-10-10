@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (Html, a, div, li, text, ul)
-import Html.Attributes exposing (href)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
@@ -179,7 +179,12 @@ view model =
 
             else
                 div []
-                    [ a [ href "#", onClick GoBack ] [ text "Back" ]
+                    [ a
+                        [ class "py-2 underline mb-4 inline-block"
+                        , href "#"
+                        , onClick GoBack
+                        ]
+                        [ text "Back" ]
                     , viewSelection decisionModel.selection
                     ]
 
@@ -194,27 +199,30 @@ viewSelection selection =
             viewItem itemNumber
 
         Error message ->
-            div [] [ text message ]
+            div [ class "text-lg" ] [ text message ]
 
 
 viewNode : Node -> Html Msg
 viewNode node =
     div []
-        [ text node.text
+        [ div [ class "text-2xl font-semibold mb-8 text-gray-800" ] [ text node.text ]
         , ul [] (map (\answer -> li [] [ viewAnswer answer ]) node.answers)
         ]
 
 
 viewItem : Int -> Html Msg
 viewItem itemNumber =
-    div [] [ text <| String.fromInt itemNumber ]
+    div [ class "text-lg" ] [ text <| String.fromInt itemNumber ]
 
 
 viewAnswer : Answer -> Html Msg
 viewAnswer answer =
     div []
         [ a
-            [ href "#", onClick <| Select answer ]
+            [ class "block border border-solid bg-gray-100 rounded mb-2 px-4 py-4"
+            , href "#"
+            , onClick <| Select answer
+            ]
             [ text answer.text ]
         ]
 
