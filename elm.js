@@ -6154,10 +6154,22 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$json$Json$Encode$string = _Json_wrap;
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var author$project$Main$viewItem = function (itemNumber) {
 	return A2(
 		elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('text-lg')
+			]),
 		_List_fromArray(
 			[
 				elm$html$Html$text(
@@ -6187,14 +6199,6 @@ var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
 };
 var elm$html$Html$a = _VirtualDom_node('a');
-var elm$json$Json$Encode$string = _Json_wrap;
-var elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$string(string));
-	});
 var elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -6228,6 +6232,7 @@ var author$project$Main$viewAnswer = function (answer) {
 				elm$html$Html$a,
 				_List_fromArray(
 					[
+						elm$html$Html$Attributes$class('block border border-solid bg-gray-100 rounded mb-2 px-4 py-4'),
 						elm$html$Html$Attributes$href('#'),
 						elm$html$Html$Events$onClick(
 						author$project$Main$Select(answer))
@@ -6246,7 +6251,16 @@ var author$project$Main$viewNode = function (node) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				elm$html$Html$text(node.text),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('text-2xl font-semibold mb-8 text-gray-800')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(node.text)
+					])),
 				A2(
 				elm$html$Html$ul,
 				_List_Nil,
@@ -6276,7 +6290,10 @@ var author$project$Main$viewSelection = function (selection) {
 			var message = selection.a;
 			return A2(
 				elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('text-lg')
+					]),
 				_List_fromArray(
 					[
 						elm$html$Html$text(message)
@@ -6327,6 +6344,7 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$a,
 						_List_fromArray(
 							[
+								elm$html$Html$Attributes$class('py-2 underline mb-4 inline-block'),
 								elm$html$Html$Attributes$href('#'),
 								elm$html$Html$Events$onClick(author$project$Main$GoBack)
 							]),
