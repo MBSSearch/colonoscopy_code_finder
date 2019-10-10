@@ -1,0 +1,12 @@
+#!/bin/bash
+
+git stash \
+  && git push \
+  && git checkout gh-pages \
+  && git rebase origin/master \
+  && elm make src/Main.elm --output=elm.js \
+  && git add elm.js \
+  && git commit -m "Deploy $(date +%Y%m%d-%H:%M:%S) ($(date +%s))" \
+  && git push \
+  && git checkout master \
+  && git stash pop
