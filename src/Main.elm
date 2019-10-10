@@ -179,14 +179,30 @@ view model =
 
             else
                 div []
-                    [ a
-                        [ class "py-2 underline mb-4 inline-block"
-                        , href "#"
-                        , onClick GoBack
-                        ]
-                        [ text "Back" ]
+                    [ viewHistory decisionModel.history
                     , viewSelection decisionModel.selection
                     ]
+
+
+viewHistory : List Node -> Html Msg
+viewHistory _ =
+    a
+        [ class "py-2 underline mb-4 inline-block"
+        , href "#"
+        , onClick GoBack
+        ]
+        {--
+        This could be a start at having breadcrumbs, but to make them viable we
+        need to:
+
+        - be able to have a node and selected answer pair
+        - dispatch an action to go back to the node in the pair
+        [ List.intersperse " > " (List.map (\node -> node.text) history)
+            |> List.foldr (++) ""
+            |> text
+        ]
+        --}
+        [ text "Back" ]
 
 
 viewSelection : Selection -> Html Msg
