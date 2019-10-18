@@ -230,7 +230,7 @@ viewAnswer answer =
 getDecisionTree : Cmd Msg
 getDecisionTree =
     Http.get
-        { url = "https://s3-ap-southeast-2.amazonaws.com/static.mbssearch.com/colonoscopy_decision_tree.json"
+        { url = "/decision_tree.json"
         , expect = Http.expectJson GotDecisionTree decisionTreeDecoder
         }
 
