@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "elm-analyse": "^0.16.4",
-    "elm-live": "^4.0.0-rc.1"
+    "elm-live": "^4.0.1"
   },
   "devDependencies": {},
   "scripts": {
