@@ -30,7 +30,7 @@ type Model
 
 
 type alias DecisionModel =
-    { tree : DecisionTree
+    { tree : Node
     , selection : Selection
     , history : List Node
     }
@@ -89,7 +89,7 @@ update msg model =
         GotDecisionTree result ->
             case result of
                 Ok tree ->
-                    ( Success <| DecisionModel tree (Question tree.root) [], Cmd.none )
+                    ( Success <| DecisionModel tree.root (Question tree.root) [], Cmd.none )
 
                 Err error ->
                     ( Failure error, Cmd.none )
