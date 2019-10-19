@@ -5,7 +5,7 @@ import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
+import Json.Decode as Decode exposing (Decoder, float, int, lazy, list, map, oneOf, string)
 import Json.Decode.Pipeline exposing (required)
 
 
@@ -31,13 +31,16 @@ type Model
 
 type alias DecisionModel =
     { tree : Node
+    , items : List Item
     , selection : Selection
     , history : List Node
     }
 
 
 type alias Response =
-    { root : Node }
+    { root : Node
+    , items : List Item
+    }
 
 
 type alias Node =
@@ -68,6 +71,13 @@ type AnswerNext
     | Error String
 
 
+type alias Item =
+    { number : Int
+    , description : String
+    , fee : Float
+    }
+
+
 type alias Selection =
     AnswerNext
 
@@ -88,8 +98,15 @@ update msg model =
     case msg of
         GotResponse result ->
             case result of
-                Ok tree ->
-                    ( Success <| DecisionModel tree.root (Question tree.root) [], Cmd.none )
+                Ok response ->
+                    ( Success <|
+                        DecisionModel
+                            response.root
+                            response.items
+                            (Question response.root)
+                            []
+                    , Cmd.none
+                    )
 
                 Err error ->
                     ( Failure error, Cmd.none )
@@ -251,6 +268,7 @@ responseDecoder : Decoder Response
 responseDecoder =
     Decode.succeed Response
         |> required "root" nodeDecoder
+        |> required "items" (list itemDecoder)
 
 
 nodeDecoder : Decoder Node
@@ -282,6 +300,14 @@ answerNextErrorDecoder : Decoder AnswerNext
 answerNextErrorDecoder =
     Decode.succeed Error
         |> required "item_number" string
+
+
+itemDecoder : Decoder Item
+itemDecoder =
+    Decode.succeed Item
+        |> required "number" int
+        |> required "description" string
+        |> required "fee" float
 
 
 toString : Http.Error -> String
