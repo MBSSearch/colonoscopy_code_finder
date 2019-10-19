@@ -36,7 +36,7 @@ type alias DecisionModel =
     }
 
 
-type alias DecisionTree =
+type alias Response =
     { root : Node }
 
 
@@ -78,7 +78,7 @@ init _ =
 
 
 type Msg
-    = GotDecisionTree (Result Http.Error DecisionTree)
+    = GotResponse (Result Http.Error Response)
     | Select Answer
     | GoBack
 
@@ -86,7 +86,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotDecisionTree result ->
+        GotResponse result ->
             case result of
                 Ok tree ->
                     ( Success <| DecisionModel tree.root (Question tree.root) [], Cmd.none )
@@ -231,7 +231,7 @@ getDecisionTree : Cmd Msg
 getDecisionTree =
     Http.get
         { url = "/decision_tree.json"
-        , expect = Http.expectJson GotDecisionTree decisionTreeDecoder
+        , expect = Http.expectJson GotResponse responseDecoder
         }
 
 
@@ -247,9 +247,9 @@ map f (Answers l) =
     List.map f l
 
 
-decisionTreeDecoder : Decoder DecisionTree
-decisionTreeDecoder =
-    Decode.succeed DecisionTree
+responseDecoder : Decoder Response
+responseDecoder =
+    Decode.succeed Response
         |> required "root" nodeDecoder
 
 
