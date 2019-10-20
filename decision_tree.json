@@ -1,0 +1,384 @@
+{
+  "items": [
+    {
+      "number": 32222,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, for a patient: (a) following a positive faecal occult blood test; or (b) who has symptoms consistent with pathology of the colonic mucosa; or (c) with anaemia or iron deficiency; or (d) for whom diagnostic imaging has shown an abnormality of the colon; or (e) who is undergoing the first examination following surgery for colorectal cancer; or (f) who is undergoing pre‑operative evaluation; or (g) for whom a repeat colonoscopy is required due to inadequate bowel preparation for the patient’s previous colonoscopy; or (h) for the management of inflammatory bowel disease Applicable only once on a day under a single episode of anaesthesia or other sedation (Anaes.)",
+      "fee": 339.70
+    },
+    {
+      "number": 32223,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, for a patient: (a) who has had a colonoscopy that revealed 1 to 4 adenomas, each of which were less than 10mm in diameter, had no villous features and had no high grade dysplasia; or (b) with a moderate risk of colorectal cancer due to family history; or (c) with a history of colorectal cancer, who has had an initial post‑operative colonoscopy that did not reveal any adenomas or colorectal cancer Applicable only once in any 5 year period (Anaes.)",
+      "fee": 339.70
+    },
+    {
+      "number": 32224,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, for a patient with a moderate risk of colorectal cancer due to: (a) a history of adenomas, including an adenoma that: (i) was greater than 10mm in diameter; or (ii) had villous features; or (iii) had high grade dysplasia; or (iv) was an advanced serrated adenoma; or (b) having had a previous colonoscopy that revealed 5 to 9 adenomas, each of which was less than 10mm in diameter, had no villous features and had no high grade dysplasia Applicable only once in any 3 year period (Anaes.)",
+      "fee": 339.70
+    },
+    {
+      "number": 32225,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, for a patient with a high risk of colorectal cancer due to having had a previous colonoscopy that: (a) revealed 10 or more adenomas; or (b) included a piecemeal, or possibly incomplete, excision of a large, sessile polyp Applicable not more than 4 times in any 12 month period (Anaes.)",
+      "fee": 339.70
+    },
+    {
+      "number": 32226,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, for a patient with a high risk of colorectal cancer due to: (a) a known or suspected familial condition, such as familial adenomatous polyposis, Lynch syndrome or serrated polyposis syndrome; or (b) a genetic mutation associated with hereditary colorectal cancer Applicable only once in any 12 month period (Anaes.)",
+      "fee": 339.70
+    },
+    {
+      "number": 32227,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy: (a) for the treatment of bleeding, including one or more of the following: (i) radiation proctitis; (ii) angioectasia; (iii) post‑polypectomy bleeding; or (b) for the treatment of colonic strictures with balloon dilatation Applicable only once on a day under a single episode of anaesthesia or other sedation (Anaes.)",
+      "fee": 476.70
+    },
+    {
+      "number": 32228,
+      "description": "Endoscopic examination of the colon to the caecum by colonoscopy, other that a service to which item 32222, 32223, 32224, 32225, or 32226 applies. Applicable only once (Anaes.)",
+      "fee": 339.70
+    }
+  ],
+    "root": {
+        "answers": [
+            {
+                "next": {
+                    "item_number": 32222
+                },
+                "text": "Positive FOBT"
+            },
+            {
+                "next": {
+                    "item_number": 32222
+                },
+                "text": "Bowel symptoms"
+            },
+            {
+                "next": {
+                    "item_number": 32222
+                },
+                "text": "Anaemia or Iron Deficiency"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32223
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had a colonoscopy in the last 5 years?"
+                            },
+                            "text": "FDR <55"
+                        },
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32223
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had a colonoscopy in the last 5 years?"
+                            },
+                            "text": "2 FDR any age"
+                        },
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32223
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had a colonoscopy in the last 5 years?"
+                            },
+                            "text": "1 FDR and 2 SDR any age"
+                        },
+                        {
+                            "next": {
+                                "item_number": "Unfunded"
+                            },
+                            "text": "None of above"
+                        }
+                    ],
+                    "text": "FDR?"
+                },
+                "text": "Family History Colon Cancer"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "answers": [
+                                                {
+                                                    "next": {
+                                                        "item_number": "Unfunded"
+                                                    },
+                                                    "text": "Yes"
+                                                },
+                                                {
+                                                    "next": {
+                                                        "item_number": 32224
+                                                    },
+                                                    "text": "No"
+                                                }
+                                            ],
+                                            "text": "Has the patient had a colonoscopy in the last 3 years?"
+                                        },
+                                        "text": "Polyp >10mm"
+                                    },
+                                    {
+                                        "next": {
+                                            "answers": [
+                                                {
+                                                    "next": {
+                                                        "item_number": "Unfunded"
+                                                    },
+                                                    "text": "Yes"
+                                                },
+                                                {
+                                                    "next": {
+                                                        "item_number": 32224
+                                                    },
+                                                    "text": "No"
+                                                }
+                                            ],
+                                            "text": "Has the patient had a colonoscopy in the last 3 years?"
+                                        },
+                                        "text": "High Grade Dysplasia"
+                                    },
+                                    {
+                                        "next": {
+                                            "answers": [
+                                                {
+                                                    "next": {
+                                                        "item_number": "Unfunded"
+                                                    },
+                                                    "text": "Yes"
+                                                },
+                                                {
+                                                    "next": {
+                                                        "item_number": 32224
+                                                    },
+                                                    "text": "No"
+                                                }
+                                            ],
+                                            "text": "Has the patient had a colonoscopy in the last 3 years?"
+                                        },
+                                        "text": "Villous Features"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32223
+                                        },
+                                        "text": "None of the above"
+                                    }
+                                ],
+                                "text": "Were any of the following present?"
+                            },
+                            "text": "Four or less"
+                        },
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32224
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had a colonoscopy in the last 3 years?"
+                            },
+                            "text": "5-9 polyps"
+                        },
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32225
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had more than four colonoscopies in the last 12 months"
+                            },
+                            "text": "10 or more polyps"
+                        },
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": 32225
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Has the patient had more than four colonoscopies in the last 12 months"
+                            },
+                            "text": "Prior piecemeal, or possibly incomplete excision of large sessile polyp"
+                        }
+                    ],
+                    "text": "How many polyps were there?"
+                },
+                "text": "Previous Polyps"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "answers": [
+                                    {
+                                        "next": {
+                                            "item_number": 32223
+                                        },
+                                        "text": "Yes"
+                                    },
+                                    {
+                                        "next": {
+                                            "item_number": "Unfunded"
+                                        },
+                                        "text": "No"
+                                    }
+                                ],
+                                "text": "Was the colonoscopy more than 5 years ago?"
+                            },
+                            "text": "Yes"
+                        },
+                        {
+                            "next": {
+                                "item_number": 32222
+                            },
+                            "text": "No"
+                        }
+                    ],
+                    "text": "Has the patient had a colonoscopy post operatively?"
+                },
+                "text": "Previous Bowel Cancer"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "item_number": "Unfunded"
+                            },
+                            "text": "Yes"
+                        },
+                        {
+                            "next": {
+                                "item_number": 32226
+                            },
+                            "text": "No"
+                        }
+                    ],
+                    "text": "Has the patient had a colonoscopy in the last year?"
+                },
+                "text": "Familial syndrome"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "item_number": 32227
+                            },
+                            "text": "Radiation proctitis"
+                        },
+                        {
+                            "next": {
+                                "item_number": 32227
+                            },
+                            "text": "Angioectasia"
+                        },
+                        {
+                            "next": {
+                                "item_number": 32227
+                            },
+                            "text": "Post polypectomy bleeding"
+                        }
+                    ],
+                    "text": "What was the nature of the bleeding?"
+                },
+                "text": "Bleeding"
+            },
+            {
+                "next": {
+                    "item_number": 32227
+                },
+                "text": "Stricture balloon dilatation"
+            },
+            {
+                "next": {
+                    "answers": [
+                        {
+                            "next": {
+                                "item_number": "Unfunded"
+                            },
+                            "text": "Yes"
+                        },
+                        {
+                            "next": {
+                                "item_number": 32228
+                            },
+                            "text": "No"
+                        }
+                    ],
+                    "text": "Has the patient ever had a previous colonoscopy?"
+                },
+                "text": "Screening/Asymptomatic"
+            }
+        ],
+        "text": "What is the indication for colonoscopy?"
+    }
+}

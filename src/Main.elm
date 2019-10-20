@@ -5,7 +5,7 @@ import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Decode exposing (Decoder, int, lazy, list, map, oneOf, string)
+import Json.Decode as Decode exposing (Decoder, float, int, lazy, list, map, oneOf, string)
 import Json.Decode.Pipeline exposing (required)
 
 
@@ -30,14 +30,17 @@ type Model
 
 
 type alias DecisionModel =
-    { tree : DecisionTree
+    { tree : Node
+    , items : List Item
     , selection : Selection
     , history : List Node
     }
 
 
-type alias DecisionTree =
-    { root : Node }
+type alias Response =
+    { root : Node
+    , items : List Item
+    }
 
 
 type alias Node =
@@ -68,6 +71,13 @@ type AnswerNext
     | Error String
 
 
+type alias Item =
+    { number : Int
+    , description : String
+    , fee : Float
+    }
+
+
 type alias Selection =
     AnswerNext
 
@@ -78,7 +88,7 @@ init _ =
 
 
 type Msg
-    = GotDecisionTree (Result Http.Error DecisionTree)
+    = GotResponse (Result Http.Error Response)
     | Select Answer
     | GoBack
 
@@ -86,10 +96,17 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotDecisionTree result ->
+        GotResponse result ->
             case result of
-                Ok tree ->
-                    ( Success <| DecisionModel tree (Question tree.root) [], Cmd.none )
+                Ok response ->
+                    ( Success <|
+                        DecisionModel
+                            response.root
+                            response.items
+                            (Question response.root)
+                            []
+                    , Cmd.none
+                    )
 
                 Err error ->
                     ( Failure error, Cmd.none )
@@ -175,7 +192,7 @@ view model =
 
         Success decisionModel ->
             if List.isEmpty decisionModel.history then
-                div [] [ viewSelection decisionModel.selection ]
+                div [] [ viewSelection decisionModel.selection decisionModel.items ]
 
             else
                 div []
@@ -185,18 +202,28 @@ view model =
                         , onClick GoBack
                         ]
                         [ text "Back" ]
-                    , viewSelection decisionModel.selection
+                    , viewSelection decisionModel.selection decisionModel.items
                     ]
 
 
-viewSelection : Selection -> Html Msg
-viewSelection selection =
+viewSelection : Selection -> List Item -> Html Msg
+viewSelection selection items =
     case selection of
         Question node ->
             viewNode node
 
         Number itemNumber ->
-            viewItem itemNumber
+            let
+                match =
+                    List.filter (\i -> i.number == itemNumber) items
+                        |> List.head
+            in
+            case match of
+                Just item ->
+                    viewItem item
+
+                Nothing ->
+                    div [ class "text-lg" ] [ text "no item found" ]
 
         Error message ->
             div [ class "text-lg" ] [ text message ]
@@ -210,9 +237,18 @@ viewNode node =
         ]
 
 
-viewItem : Int -> Html Msg
-viewItem itemNumber =
-    div [ class "text-lg" ] [ text <| String.fromInt itemNumber ]
+viewItem : Item -> Html Msg
+viewItem item =
+    div [ class "text-lg" ]
+        [ div [ class "mb-4 text-xl font-bold" ] [ text <| String.fromInt item.number ]
+        , div [ class "mb-8" ] [ text item.description ]
+        , div [ class "mb-8" ] [ text <| "$" ++ String.fromFloat item.fee ]
+        , div [ class "underline" ]
+            [ a
+                [ href <| "http://www9.health.gov.au/mbs/fullDisplay.cfm?q=" ++ String.fromInt item.number ]
+                [ text "View on MBS Online" ]
+            ]
+        ]
 
 
 viewAnswer : Answer -> Html Msg
@@ -230,8 +266,8 @@ viewAnswer answer =
 getDecisionTree : Cmd Msg
 getDecisionTree =
     Http.get
-        { url = "https://s3-ap-southeast-2.amazonaws.com/static.mbssearch.com/colonoscopy_decision_tree.json"
-        , expect = Http.expectJson GotDecisionTree decisionTreeDecoder
+        { url = "/decision_tree.json"
+        , expect = Http.expectJson GotResponse responseDecoder
         }
 
 
@@ -247,10 +283,11 @@ map f (Answers l) =
     List.map f l
 
 
-decisionTreeDecoder : Decoder DecisionTree
-decisionTreeDecoder =
-    Decode.succeed DecisionTree
+responseDecoder : Decoder Response
+responseDecoder =
+    Decode.succeed Response
         |> required "root" nodeDecoder
+        |> required "items" (list itemDecoder)
 
 
 nodeDecoder : Decoder Node
@@ -282,6 +319,14 @@ answerNextErrorDecoder : Decoder AnswerNext
 answerNextErrorDecoder =
     Decode.succeed Error
         |> required "item_number" string
+
+
+itemDecoder : Decoder Item
+itemDecoder =
+    Decode.succeed Item
+        |> required "number" int
+        |> required "description" string
+        |> required "fee" float
 
 
 toString : Http.Error -> String
