@@ -4486,8 +4486,8 @@ function _Browser_load(url)
 	}));
 }
 var author$project$Main$Loading = {$: 'Loading'};
-var author$project$Main$GotDecisionTree = function (a) {
-	return {$: 'GotDecisionTree', a: a};
+var author$project$Main$GotResponse = function (a) {
+	return {$: 'GotResponse', a: a};
 };
 var elm$core$Basics$apR = F2(
 	function (x, f) {
@@ -4974,9 +4974,31 @@ var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 			A2(elm$json$Json$Decode$field, key, valDecoder),
 			decoder);
 	});
-var author$project$Main$DecisionTree = function (root) {
-	return {root: root};
-};
+var author$project$Main$Response = F2(
+	function (root, items) {
+		return {items: items, root: root};
+	});
+var author$project$Main$Item = F3(
+	function (number, description, fee) {
+		return {description: description, fee: fee, number: number};
+	});
+var elm$json$Json$Decode$float = _Json_decodeFloat;
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$json$Json$Decode$string = _Json_decodeString;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var author$project$Main$itemDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'fee',
+	elm$json$Json$Decode$float,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'description',
+		elm$json$Json$Decode$string,
+		A3(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'number',
+			elm$json$Json$Decode$int,
+			elm$json$Json$Decode$succeed(author$project$Main$Item))));
 var author$project$Main$Answer = F2(
 	function (text, next) {
 		return {next: next, text: text};
@@ -4994,8 +5016,6 @@ var author$project$Main$Question = function (a) {
 var author$project$Main$Error = function (a) {
 	return {$: 'Error', a: a};
 };
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
 var author$project$Main$answerNextErrorDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'item_number',
@@ -5004,7 +5024,6 @@ var author$project$Main$answerNextErrorDecoder = A3(
 var author$project$Main$Number = function (a) {
 	return {$: 'Number', a: a};
 };
-var elm$json$Json$Decode$int = _Json_decodeInt;
 var author$project$Main$answerNextNumberDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'item_number',
@@ -5079,11 +5098,15 @@ try {
 	};
 } catch ($) {
 throw 'Some top-level definitions from `Main` are causing infinite recursion:\n\n  ┌─────┐\n  │    answerDecoder\n  │     ↓\n  │    answerNextQuestionDecoder\n  │     ↓\n  │    nodeDecoder\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.0/halting-problem to learn how to fix it!';}
-var author$project$Main$decisionTreeDecoder = A3(
+var author$project$Main$responseDecoder = A3(
 	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'root',
-	author$project$Main$nodeDecoder,
-	elm$json$Json$Decode$succeed(author$project$Main$DecisionTree));
+	'items',
+	elm$json$Json$Decode$list(author$project$Main$itemDecoder),
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'root',
+		author$project$Main$nodeDecoder,
+		elm$json$Json$Decode$succeed(author$project$Main$Response)));
 var elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -5964,15 +5987,15 @@ var elm$http$Http$get = function (r) {
 };
 var author$project$Main$getDecisionTree = elm$http$Http$get(
 	{
-		expect: A2(elm$http$Http$expectJson, author$project$Main$GotDecisionTree, author$project$Main$decisionTreeDecoder),
-		url: 'https://s3-ap-southeast-2.amazonaws.com/static.mbssearch.com/colonoscopy_decision_tree.json'
+		expect: A2(elm$http$Http$expectJson, author$project$Main$GotResponse, author$project$Main$responseDecoder),
+		url: '/decision_tree.json'
 	});
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(author$project$Main$Loading, author$project$Main$getDecisionTree);
 };
-var author$project$Main$DecisionModel = F3(
-	function (tree, selection, history) {
-		return {history: history, selection: selection, tree: tree};
+var author$project$Main$DecisionModel = F4(
+	function (tree, items, selection, history) {
+		return {history: history, items: items, selection: selection, tree: tree};
 	});
 var author$project$Main$Failure = function (a) {
 	return {$: 'Failure', a: a};
@@ -6015,16 +6038,17 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'GotDecisionTree':
+			case 'GotResponse':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var tree = result.a;
+					var response = result.a;
 					return _Utils_Tuple2(
 						author$project$Main$Success(
-							A3(
+							A4(
 								author$project$Main$DecisionModel,
-								tree,
-								author$project$Main$Question(tree.root),
+								response.root,
+								response.items,
+								author$project$Main$Question(response.root),
 								_List_Nil)),
 						elm$core$Platform$Cmd$none);
 				} else {
@@ -6139,6 +6163,7 @@ var author$project$Main$toString = function (error) {
 			return 'bad body' + string;
 	}
 };
+var elm$core$String$fromFloat = _String_fromNumber;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -6151,6 +6176,7 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var elm$html$Html$a = _VirtualDom_node('a');
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
@@ -6163,7 +6189,13 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
-var author$project$Main$viewItem = function (itemNumber) {
+var elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var author$project$Main$viewItem = function (item) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -6172,8 +6204,58 @@ var author$project$Main$viewItem = function (itemNumber) {
 			]),
 		_List_fromArray(
 			[
-				elm$html$Html$text(
-				elm$core$String$fromInt(itemNumber))
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('mb-4 text-xl font-bold')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						elm$core$String$fromInt(item.number))
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('mb-8')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(item.description)
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('mb-8')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'$' + elm$core$String$fromFloat(item.fee))
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('underline')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$a,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$href(
+								'http://www9.health.gov.au/mbs/fullDisplay.cfm?q=' + elm$core$String$fromInt(item.number))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('View on MBS Online')
+							]))
+					]))
 			]));
 };
 var elm$core$List$map = F2(
@@ -6197,13 +6279,6 @@ var author$project$Main$map = F2(
 	});
 var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
-};
-var elm$html$Html$a = _VirtualDom_node('a');
-var elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
 };
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6278,28 +6353,61 @@ var author$project$Main$viewNode = function (node) {
 					node.answers))
 			]));
 };
-var author$project$Main$viewSelection = function (selection) {
-	switch (selection.$) {
-		case 'Question':
-			var node = selection.a;
-			return author$project$Main$viewNode(node);
-		case 'Number':
-			var itemNumber = selection.a;
-			return author$project$Main$viewItem(itemNumber);
-		default:
-			var message = selection.a;
-			return A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('text-lg')
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text(message)
-					]));
-	}
-};
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$Main$viewSelection = F2(
+	function (selection, items) {
+		switch (selection.$) {
+			case 'Question':
+				var node = selection.a;
+				return author$project$Main$viewNode(node);
+			case 'Number':
+				var itemNumber = selection.a;
+				var match = elm$core$List$head(
+					A2(
+						elm$core$List$filter,
+						function (i) {
+							return _Utils_eq(i.number, itemNumber);
+						},
+						items));
+				if (match.$ === 'Just') {
+					var item = match.a;
+					return author$project$Main$viewItem(item);
+				} else {
+					return A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('text-lg')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('no item found')
+							]));
+				}
+			default:
+				var message = selection.a;
+				return A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('text-lg')
+						]),
+					_List_fromArray(
+						[
+							elm$html$Html$text(message)
+						]));
+		}
+	});
 var elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -6334,7 +6442,7 @@ var author$project$Main$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						author$project$Main$viewSelection(decisionModel.selection)
+						A2(author$project$Main$viewSelection, decisionModel.selection, decisionModel.items)
 					])) : A2(
 				elm$html$Html$div,
 				_List_Nil,
@@ -6352,7 +6460,7 @@ var author$project$Main$view = function (model) {
 							[
 								elm$html$Html$text('Back')
 							])),
-						author$project$Main$viewSelection(decisionModel.selection)
+						A2(author$project$Main$viewSelection, decisionModel.selection, decisionModel.items)
 					]));
 	}
 };
